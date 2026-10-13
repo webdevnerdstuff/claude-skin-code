@@ -1,4 +1,9 @@
-# skin-code
+<h1 align="center">
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset="docs/brand/banner-dark.svg">
+		<img alt="skin-code" src="docs/brand/banner-light.svg" width="720">
+	</picture>
+</h1>
 
 Real syntax highlighting for code blocks in Claude Code replies. skin-code tokenizes each fenced block with **VS Code's own grammars** through [Shiki](https://shiki.style) and colours it with **VS Code themes**, so code in Claude Code looks the way it does in your editor.
 
@@ -120,7 +125,7 @@ VS Code wraps a `.php` file in a `text.html.php` scope that Shiki's PHP grammar 
 ```bash
 pnpm build     # bundles Shiki, the grammars and the themes into hooks/vendor
 pnpm validate  # claude plugin validate .
-pnpm test          # claude plugin test .
+pnpm test      # claude plugin test .
 ```
 
 Load it from the folder while you work on it: `claude --plugin-dir .`. More in [AGENTS.md](AGENTS.md).

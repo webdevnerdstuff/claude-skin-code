@@ -170,13 +170,14 @@ describe('/skin-code', () => {
 		expect(asked).toEqual([
 			'https://raw.githubusercontent.com/someone/themes/main/test-theme.json',
 		]);
-		expect(added.text).toContain('Added test-theme');
+		expect(added.text).toBe(
+			'Added Test Theme and switched to it. /skin-code auto goes back to following your skin.',
+		);
 		expect((await run($, 'list')).text).toMatch(
-			/\| test-theme \(added\) +\| test-theme +\|/,
+			/\| test-theme \(added\) \(current\) +\| test-theme +\|/,
 		);
 
-		await run($, 'test-theme');
-
+		// No /skin-code test-theme needed: adding it switched to it.
 		const ui = await $.ui.mount({
 			plugin: 'skin-code',
 			surface: 'desktop',
@@ -327,6 +328,22 @@ describe('header and numbers', () => {
 		expect(
 			(await ui.find({ type: 'Text', text: /^Platform$/ }))?.props.color,
 		).toBe('#DF00DF');
+	});
+});
+
+describe('/skin-code add, when it fails', () => {
+	test('keeps the setting as it was', async ($, on) => {
+		world(on);
+		on('http.fetch', () => ({
+			value: { status: 404, ok: false, headers: {}, text: '' },
+		}));
+
+		await run($, 'dracula');
+
+		expect(
+			(await run($, 'add https://example.com/missing.json')).text,
+		).toContain('Could not add a theme');
+		expect((await run($, '')).text).toContain('Code theme: Dracula Theme.');
 	});
 });
 

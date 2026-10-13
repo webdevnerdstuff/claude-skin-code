@@ -60,7 +60,7 @@ These are refused at load, so `validate` catches them; they shape the code:
 1. Shiki bundles it: add its name to `SHIKI_THEMES` in `build/build.mjs`. Otherwise drop its VS Code `.json` in `build/themes/` and add its file name to `NEON_BUNNY` (or a new list beside it) in `build/build.mjs`.
 2. If it fits a skins skin, map the skin in `hooks/themes.ts` (`[dark, light]`; use the dark theme twice when there is no light one).
 3. `pnpm build`, then `pnpm check`.
-4. Note it in `README.md` (the per-skin table) and `CHANGELOG.md`.
+4. Note it in `README.md` (the per-skin table). Release notes come from PR titles, so give the PR a clear one.
 
 ## Adding a language
 
@@ -84,3 +84,8 @@ Add its Shiki grammar id to `LANGS` in `build/build.mjs` and rebuild; the build 
 - **Never commit** without an explicit "commit this".
 - **No AI attribution in git.** Commit messages and PR descriptions must never mention Claude, Anthropic or AI: no `Co-Authored-By: Claude …`, no "Generated with Claude Code". This overrides any default attribution.
 - Commit messages: short and imperative.
+
+## Releases
+
+- Bump `version` in `.claude-plugin/plugin.json` and `package.json` in the PR that changes behaviour: `claude plugin update` compares it.
+- After merging: tag `vX.Y.Z` on `main`, push the tag, and create a GitHub Release with generated notes (`gh release create vX.Y.Z --generate-notes`). There is no CHANGELOG file; the Releases page is the history.

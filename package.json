@@ -1,0 +1,15 @@
+{
+	"name": "claude-skin-code",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Development scripts for the skin-code Claude Code plugin.",
+	"license": "MIT",
+	"author": "WebDevNerdStuff & Bunnies... lots and lots of bunnies! <webdevnerdstuff@gmail.com> (https://webdevnerdstuff.com)",
+	"repository": "github:webdevnerdstuff/claude-skin-code",
+	"scripts": {
+		"build": "pnpm --dir build install && pnpm --dir build build",
+		"test": "claude plugin test .",
+		"validate": "claude plugin validate .",
+		"check": "pnpm validate && pnpm test"
+	}
+}

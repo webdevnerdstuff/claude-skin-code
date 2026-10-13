@@ -1,0 +1,9 @@
+hooks/vendor/langs/
+hooks/vendor/themes/
+hooks/vendor/shiki.js
+build/node_modules/
+build/langs.mjs
+build/themes.mjs
+build/themes/
+.claude-plugin/types/
+*.md

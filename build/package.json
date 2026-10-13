@@ -1,0 +1,24 @@
+{
+	"name": "skin-code-build",
+	"private": true,
+	"type": "module",
+	"description": "Builds hooks/vendor for skin-code: Shiki, its grammars and the code themes.",
+	"scripts": {
+		"build": "node build.mjs"
+	},
+	"devDependencies": {
+		"@shikijs/core": "3.23.0",
+		"@shikijs/engine-javascript": "3.23.0",
+		"@shikijs/langs": "3.23.0",
+		"@shikijs/themes": "3.23.0",
+		"esbuild": "^0.25.0",
+		"shiki": "3.23.0"
+	},
+	"author": "WebDevNerdStuff & Bunnies... lots and lots of bunnies! <webdevnerdstuff@gmail.com> (https://webdevnerdstuff.com)",
+	"license": "MIT",
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
+	}
+}

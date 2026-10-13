@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+
+# Build intermediates; build/build.mjs writes them each run.
+build/langs.mjs
+build/themes.mjs
+
+# Laid by Claude Code each time it loads the plugin.
+.claude-plugin/types/

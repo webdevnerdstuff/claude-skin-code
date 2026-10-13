@@ -1,0 +1,15 @@
+{
+	"name": "claude-skin-code",
+	"description": "skin-code: VS Code syntax highlighting and themes for code blocks in Claude Code.",
+	"owner": {
+		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
+		"email": "webdevnerdstuff@gmail.com",
+		"url": "https://webdevnerdstuff.com"
+	},
+	"plugins": [
+		{
+			"name": "skin-code",
+			"source": "./"
+		}
+	]
+}

@@ -1,0 +1,23 @@
+{
+	"name": "skin-code",
+	"version": "0.1.0",
+	"description": "Real syntax highlighting for code blocks in Claude Code replies: VS Code's grammars and themes through Shiki, following your skins skin or a theme you pick. /skin-code switches it.",
+	"author": {
+		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
+		"email": "webdevnerdstuff@gmail.com",
+		"url": "https://webdevnerdstuff.com"
+	},
+	"homepage": "https://github.com/webdevnerdstuff/claude-skin-code",
+	"repository": "https://github.com/webdevnerdstuff/claude-skin-code",
+	"license": "MIT",
+	"keywords": [
+		"claude-code-mods",
+		"claude-mods",
+		"function-hooks",
+		"syntax-highlighting",
+		"shiki",
+		"vscode-theme",
+		"neon-bunny"
+	],
+	"types": "./types/index.d.ts"
+}

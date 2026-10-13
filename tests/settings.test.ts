@@ -266,6 +266,30 @@ group('listText', () => {
 	});
 });
 
+group('list tables', () => {
+	test('every row has as many columns as its header', () => {
+		const text = listText({
+			themes: THEMES,
+			pairs: SKIN_THEMES,
+			added: [],
+			current: 'auto',
+		});
+		// A table row's cells are split on |: a | inside a cell adds a column.
+		const columns = (line: string) => line.split('|').length;
+		const tables = text.split('\n\n').filter((block) => block.startsWith('| '));
+
+		expect(tables).toHaveLength(2);
+
+		for (const table of tables) {
+			const lines = table.split('\n');
+
+			for (const line of lines) {
+				expect(columns(line)).toBe(columns(lines[0] ?? ''));
+			}
+		}
+	});
+});
+
 group('rawUrl', () => {
 	test('a GitHub file page reads its raw file', () => {
 		expect(
@@ -306,7 +330,7 @@ group('options', () => {
 		});
 
 		expect(text.split('\n')[0]).toContain('header on · line numbers off.');
-		expect(text).toContain('/skin-code header on | off');
-		expect(text).toContain('/skin-code numbers on | off');
+		expect(text).toContain('/skin-code header on/off');
+		expect(text).toContain('/skin-code numbers on/off');
 	});
 });

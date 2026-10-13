@@ -284,8 +284,8 @@ export function listText({
 				['/skin-code off', 'leave code blocks to skins or the app'],
 				['/skin-code add <url or path>', 'add a VS Code theme .json'],
 				['/skin-code remove <name>', 'remove a theme you added'],
-				['/skin-code header on | off', 'the language and line count bar'],
-				['/skin-code numbers on | off', 'the line numbers'],
+				['/skin-code header on/off', 'the language and line count bar'],
+				['/skin-code numbers on/off', 'the line numbers'],
 			],
 		),
 	].join('\n');

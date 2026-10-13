@@ -8,6 +8,7 @@ First release.
 - 29 themes: Neon Bunny, Neon Bunny Carrot and 27 Shiki themes, dark and light
 - `auto` follows the active skins skin and its light or dark mode; skins is optional
 - `/skin-code` with `auto`, `off`, `list`, `add <url or path>`, `remove <name>`, a skin or a theme; the setting and added themes persist
+- `/skin-code add` switches to the theme it added; a failed add changes nothing
 - `$.skinCode.addTheme` and `$.skinCode.themes` for other mods
 - 39 languages; PHP drawn as VS Code draws it (`text.html.php` theme rules, `<?php` as one token)
 - Tabs expand to stops of four, so tab-aligned columns line up

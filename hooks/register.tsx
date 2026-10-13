@@ -367,8 +367,12 @@ export const register: Register = (on) => {
 					'user',
 				);
 
+				// Adding a theme is asking to see it: switch to it, as /skin-code <name> would.
+				await update($, mode, () => name);
+				await $.store.set('mode', name);
+
 				return {
-					text: `Added ${name}. /skin-code ${name} draws with it.`,
+					text: `Added ${displayNameOf(name)} and switched to it. /skin-code auto goes back to following your skin.`,
 				};
 			} catch (error) {
 				return {

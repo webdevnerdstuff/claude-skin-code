@@ -36,7 +36,8 @@ Needs Claude Code 2.1.287 or newer, the version the tests run on (the function-h
 | `/skin-code <skin>` | A skin's theme pair, switching with light and dark, e.g. `/skin-code catppuccin` |
 | `/skin-code <theme>` | One theme, always, e.g. `/skin-code github-dark` |
 | `/skin-code off` | Leaves code blocks to skins or the app |
-| `/skin-code list` | Lists every skin pair and theme |
+| `/skin-code list` or `themes` | Lists every skin pair and theme |
+| `/skin-code help` | Lists the commands |
 | `/skin-code add <url or path>` | Adds a VS Code theme `.json`; a GitHub file link works as is |
 | `/skin-code remove <name>` | Removes a theme you added |
 | `/skin-code header on\|off` | Shows or hides the bar with the language and line count |

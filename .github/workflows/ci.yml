@@ -31,8 +31,13 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      # Newer packages fetch a native binary in a postinstall step; run it again when it did not
+      # take, as the package's own error message says to.
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code@${{ matrix.claude }}
+        run: |
+          npm install -g @anthropic-ai/claude-code@${{ matrix.claude }}
+          claude --version || node "$(npm root -g)/@anthropic-ai/claude-code/install.cjs"
+          claude --version
 
       - name: Validate the marketplace and plugin manifests
         run: claude plugin validate .

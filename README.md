@@ -10,7 +10,7 @@ Real syntax highlighting for code blocks in Claude Code replies. skin-code token
 - 29 themes bundled, dark and light, including [Neon Bunny](https://github.com/webdevnerdstuff/neon-bunny-vscode-theme) and Neon Bunny Carrot
 - Add any VS Code theme `.json` from a URL or a file: `/skin-code add <url or path>`
 - Follows the [skins](https://github.com/hellosverre/claude-skins) mod when it is installed: change your skin and the code colours change with it, light or dark
-- 40+ languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them
+- 39 languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them
 - Desktop app: each block is a card with the theme's background, line numbers, the language and a copy button; the header and numbers can be switched off
 - Terminal: framed rows in the theme's colours, with the language on the frame
 - An API so other mods can ship their own themes
@@ -138,4 +138,4 @@ Load it from the folder while you work on it: `claude --plugin-dir .`. More in [
 
 ## License
 
-MIT © WebDevNerdStuff
+MIT © WebDevNerdStuff. The bundled Shiki code, grammars and themes keep their own licences: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

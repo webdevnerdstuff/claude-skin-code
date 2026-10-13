@@ -26,6 +26,12 @@ devDependencies:
   shiki:
     specifier: 3.23.0
     version: 3.23.0
+  tm-grammars:
+    specifier: 1.32.22
+    version: 1.32.22
+  tm-themes:
+    specifier: 1.12.12
+    version: 1.12.12
 
 packages:
 
@@ -486,6 +492,14 @@ packages:
     dependencies:
       character-entities-html4: 2.1.0
       character-entities-legacy: 3.0.0
+    dev: true
+
+  /tm-grammars@1.32.22:
+    resolution: {integrity: sha512-VKWL+UiqlGqbGHonRbrBc0kkqDIHUUiVO/A2rBTBz5LBXKA8Fe2f34O1YiBI7ED37tTUlT3MGmLf9+0F/H4/Ww==}
+    dev: true
+
+  /tm-themes@1.12.12:
+    resolution: {integrity: sha512-okyxQlASpDOtUA40+ZT0IGQyfObGOknntHY3kujfUlD8lj3ERMObDJNRgvlc/baVMsnJVQmtAB2nE7LFGTo0qQ==}
     dev: true
 
   /trim-lines@3.0.1:

@@ -7,7 +7,7 @@
 	"author": "WebDevNerdStuff & Bunnies... lots and lots of bunnies! <webdevnerdstuff@gmail.com> (https://webdevnerdstuff.com)",
 	"repository": "github:webdevnerdstuff/claude-skin-code",
 	"scripts": {
-		"build": "pnpm --dir build install && pnpm --dir build build",
+		"build": "pnpm --dir build install --config.confirm-modules-purge=false && pnpm --dir build build",
 		"test": "claude plugin test .",
 		"validate": "claude plugin validate .",
 		"check": "pnpm validate && pnpm test"

@@ -12,7 +12,9 @@
 		"@shikijs/langs": "3.23.0",
 		"@shikijs/themes": "3.23.0",
 		"esbuild": "^0.25.0",
-		"shiki": "3.23.0"
+		"shiki": "3.23.0",
+		"tm-grammars": "1.32.22",
+		"tm-themes": "1.12.12"
 	},
 	"author": "WebDevNerdStuff & Bunnies... lots and lots of bunnies! <webdevnerdstuff@gmail.com> (https://webdevnerdstuff.com)",
 	"license": "MIT",

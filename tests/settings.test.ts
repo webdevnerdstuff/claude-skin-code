@@ -262,6 +262,7 @@ group('listText', () => {
 		expect(lines[end + 1]).toBe('');
 		expect(lines[end + 2]).toMatch(/^\| Command /);
 		expect(text).toContain('/skin-code add <url or path>');
+		expect(text).toContain('/skin-code remove <name>');
 	});
 });
 

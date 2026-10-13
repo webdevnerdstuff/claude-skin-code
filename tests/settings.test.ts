@@ -280,6 +280,8 @@ group('helpText', () => {
 		}
 
 		expect(help).not.toContain('| Skin');
+		// Claude Code prefixes a reply's first line with the plugin's name: a table can't start there.
+		expect(help.split('\n')[0]).not.toMatch(/^\|/);
 		expect(help.split('\n').at(-1)).toBe('/skin-code list shows the themes.');
 	});
 });

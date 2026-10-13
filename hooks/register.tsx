@@ -5,6 +5,7 @@ import { MAX_LINES, cardWidth, codeCard } from './card';
 import { expandTabs, split } from './fences';
 import {
 	COMMAND,
+	helpText,
 	isUrl,
 	listText,
 	optionText,
@@ -288,7 +289,7 @@ export const register: Register = (on) => {
 			description:
 				'Colour code blocks with VS Code themes: auto, off, list, add, or a theme',
 			argumentHint:
-				'[auto | off | list | add <url or path> | remove <name> | <theme>]',
+				'[auto | off | list | themes | help | add <url or path> | remove <name> | <theme>]',
 			immediate: true,
 		});
 
@@ -324,6 +325,10 @@ export const register: Register = (on) => {
 		const all = await pairsOf($);
 		const loaded = await loadAdded($);
 		const asked = parse(e.args, themeNames(), all);
+
+		if (asked.kind === 'help') {
+			return { text: helpText() };
+		}
 
 		if (asked.kind === 'list') {
 			const current = await read($, mode);

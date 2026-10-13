@@ -1,6 +1,7 @@
 import { describe as group, expect, test } from 'claude-code/testing';
 import {
 	describe,
+	helpText,
 	listText,
 	optionText,
 	parse,
@@ -58,6 +59,8 @@ group('parse', () => {
 
 	test('list, add and remove', () => {
 		expect(parse('list', THEMES)).toEqual({ kind: 'list' });
+		expect(parse('help', THEMES)).toEqual({ kind: 'help' });
+		expect(parse('themes', THEMES)).toEqual({ kind: 'list' });
 		expect(parse('add https://example.com/theme.json', THEMES)).toEqual({
 			kind: 'add',
 			source: 'https://example.com/theme.json',
@@ -256,24 +259,42 @@ group('listText', () => {
 		);
 	});
 
-	test('the commands follow the themes table directly', () => {
-		const end = lines.findIndex((line) => line.startsWith('| mine'));
+	test('the themes, then where the commands are; no commands table', () => {
+		expect(text).not.toContain('| Command');
+		expect(lines.at(-1)).toBe('/skin-code help shows the commands.');
+	});
+});
 
-		expect(lines[end + 1]).toBe('');
-		expect(lines[end + 2]).toMatch(/^\| Command /);
-		expect(text).toContain('/skin-code add <url or path>');
-		expect(text).toContain('/skin-code remove <name>');
+group('helpText', () => {
+	test('every command, then where the themes are; no themes table', () => {
+		const help = helpText();
+
+		for (const command of [
+			'/skin-code auto',
+			'/skin-code off',
+			'/skin-code list',
+			'/skin-code add <url or path>',
+			'/skin-code remove <name>',
+		]) {
+			expect(help).toContain(command);
+		}
+
+		expect(help).not.toContain('| Skin');
+		expect(help.split('\n').at(-1)).toBe('/skin-code list shows the themes.');
 	});
 });
 
 group('list tables', () => {
 	test('every row has as many columns as its header', () => {
-		const text = listText({
-			themes: THEMES,
-			pairs: SKIN_THEMES,
-			added: [],
-			current: 'auto',
-		});
+		const text = [
+			listText({
+				themes: THEMES,
+				pairs: SKIN_THEMES,
+				added: [],
+				current: 'auto',
+			}),
+			helpText(),
+		].join('\n\n');
 		// A table row's cells are split on |: a | inside a cell adds a column.
 		const columns = (line: string) => line.split('|').length;
 		const tables = text.split('\n\n').filter((block) => block.startsWith('| '));
@@ -320,7 +341,7 @@ group('options', () => {
 		).toContain('Header off · line numbers on.');
 	});
 
-	test('the list shows them and how to switch them', () => {
+	test('the list shows them, and help how to switch them', () => {
 		const text = listText({
 			themes: THEMES,
 			pairs: SKIN_THEMES,
@@ -330,7 +351,7 @@ group('options', () => {
 		});
 
 		expect(text.split('\n')[0]).toContain('header on · line numbers off.');
-		expect(text).toContain('/skin-code header on/off');
-		expect(text).toContain('/skin-code numbers on/off');
+		expect(helpText()).toContain('/skin-code header on/off');
+		expect(helpText()).toContain('/skin-code numbers on/off');
 	});
 });

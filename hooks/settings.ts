@@ -15,6 +15,7 @@ export type Pairs = Readonly<Record<string, ThemePair>>;
 export type Parsed =
 	| { kind: 'status' }
 	| { kind: 'list' }
+	| { kind: 'help' }
 	| { kind: 'set'; setting: string }
 	| { kind: 'add'; source: string }
 	| { kind: 'remove'; name: string }
@@ -54,8 +55,12 @@ export function parse(
 		return { kind: 'status' };
 	}
 
-	if (word === 'list') {
+	if (word === 'list' || word === 'themes') {
 		return { kind: 'list' };
+	}
+
+	if (word === 'help') {
+		return { kind: 'help' };
 	}
 
 	if (word === 'add' && tail !== '') {
@@ -275,6 +280,13 @@ export function listText({
 			]),
 		),
 		'',
+		'/skin-code help shows the commands.',
+	].join('\n');
+}
+
+// Every /skin-code command and what it does: the reply to /skin-code help.
+export function helpText(): string {
+	return [
 		markdownTable(
 			['Command', 'What it does'],
 			[
@@ -282,12 +294,15 @@ export function listText({
 				['/skin-code <theme>', 'that theme, always'],
 				['/skin-code auto', 'follow your skins skin'],
 				['/skin-code off', 'leave code blocks to skins or the app'],
+				['/skin-code list (or themes)', 'every skin and theme'],
 				['/skin-code add <url or path>', 'add a VS Code theme .json'],
 				['/skin-code remove <name>', 'remove a theme you added'],
 				['/skin-code header on/off', 'the language and line count bar'],
 				['/skin-code numbers on/off', 'the line numbers'],
 			],
 		),
+		'',
+		'/skin-code list shows the themes.',
 	].join('\n');
 }
 

@@ -284,9 +284,13 @@ export function listText({
 	].join('\n');
 }
 
-// Every /skin-code command and what it does: the reply to /skin-code help.
+// Every /skin-code command and what it does: the reply to /skin-code help. It opens with a
+// line of text: Claude Code puts the plugin's name before a reply's first line, which would
+// break a table that started there.
 export function helpText(): string {
 	return [
+		'skin-code commands',
+		'',
 		markdownTable(
 			['Command', 'What it does'],
 			[

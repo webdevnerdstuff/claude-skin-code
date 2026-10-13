@@ -1,0 +1,41 @@
+name: CI
+
+# The manifest checks and the engine tests, against the Claude Code the plugin is tested on and,
+# as an early warning, the latest build. Nothing here talks to the model or needs a secret.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (claude ${{ matrix.claude }})
+    runs-on: ubuntu-latest
+    # The latest build may change the mod API before skin-code catches up: it reports, it does not block.
+    continue-on-error: ${{ matrix.claude == 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        claude: ['2.1.287', latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code@${{ matrix.claude }}
+
+      - name: Validate the marketplace and plugin manifests
+        run: claude plugin validate .
+
+      - name: Engine tests
+        run: claude plugin test .

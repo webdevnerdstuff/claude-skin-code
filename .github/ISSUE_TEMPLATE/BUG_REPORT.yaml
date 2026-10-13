@@ -1,0 +1,92 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug Report]: "
+labels: ["bug", "triage"]
+assignees:
+  - webdevnerdstuff
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: skin-code-version
+    attributes:
+      label: skin-code Version
+      description: The `version` in the plugin's `.claude-plugin/plugin.json`, or the one `claude plugin list` shows.
+    validations:
+      required: true
+  - type: input
+    id: claude-code-version
+    attributes:
+      label: Claude Code Version
+      description: What `claude --version` prints.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where it happens
+      multiple: true
+      options:
+        - Desktop app
+        - Terminal
+        - VS Code extension
+        - Mobile
+    validations:
+      required: true
+  - type: input
+    id: setting
+    attributes:
+      label: skin-code setting
+      description: What `/skin-code` (with nothing after it) prints.
+    validations:
+      required: true
+  - type: dropdown
+    id: skins
+    attributes:
+      label: Is the skins mod installed?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Code block language
+      description: The language tag on the fence, e.g. `php`, `vue`, `ts`.
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: What happened? Screenshots help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Which steps do we need to take to reproduce this error?
+      placeholder: "Steps to reproduce the behavior:\n1. Run '/skin-code ...'\n2. Ask Claude for a code block in '...'\n3. See '....'"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: If applicable, paste any relevant output, such as a `skin-code:` line from the transcript or from `claude --debug`. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/webdevnerdstuff/claude-skin-code/blob/main/.github/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

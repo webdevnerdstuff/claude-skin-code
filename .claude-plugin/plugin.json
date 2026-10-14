@@ -1,6 +1,6 @@
 {
 	"name": "skin-code",
-	"version": "0.2.4",
+	"version": "0.2.5",
 	"description": "Real syntax highlighting for code blocks in Claude Code replies: VS Code's grammars and themes through Shiki, following your skins skin or a theme you pick. /skin-code switches it.",
 	"author": {
 		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",

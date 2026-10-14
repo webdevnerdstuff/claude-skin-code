@@ -12,7 +12,7 @@ Real syntax highlighting for code blocks in Claude Code replies. skin-code token
 - Follows the [skins](https://github.com/hellosverre/claude-skins) mod when it is installed: change your skin and the code colours change with it, light or dark
 - 39 languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them
 - Desktop app: each block is a card with the theme's background, line numbers, the language and a copy button; the header and numbers can be switched off
-- Terminal: framed rows in the theme's colours, with the language on the frame
+- Terminal: framed rows in the theme's colours, with the language on the frame and, in Claude Code's fullscreen layout, a Copy button
 - An API so other mods can ship their own themes
 
 ## Install

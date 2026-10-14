@@ -516,27 +516,33 @@ export const register: Register = (on) => {
 				const lines = tokensOf(segment.code, segment.lang, theme);
 				const block = `${e.requestId}:${i}`;
 				const isCopied = justCopied === block;
+				const press = () => void copy(segment.code, block);
 				// On a card the icon is drawn in the image, so the control is a blank target over
-				// it; on the terminal it is the glyph itself.
-				const copyButton = (
-					<Button
-						key={`skin-code-copy-${i}`}
-						label={
-							Svg === undefined
-								? isCopied
-									? '✓'
-									: '⧉'
-								: HIT_TARGET
-						}
-						plain
-						dimColor
-						hover={{
-							backgroundColor: hoverBackground,
-							dimColor: false,
-						}}
-						onPress={() => void copy(segment.code, block)}
-					/>
-				);
+				// it with the card's hover. On the terminal it is a word, as skins writes it (a
+				// glyph is drawn wider than its cell in many fonts), with no hover: a terminal has
+				// no translucent colours, and it inverts a button under the pointer by itself.
+				const copyButton =
+					Svg === undefined ? (
+						<Button
+							key={`skin-code-copy-${i}`}
+							label={isCopied ? ' Copied ' : ' Copy '}
+							plain
+							dimColor
+							onPress={press}
+						/>
+					) : (
+						<Button
+							key={`skin-code-copy-${i}`}
+							label={HIT_TARGET}
+							plain
+							dimColor
+							hover={{
+								backgroundColor: hoverBackground,
+								dimColor: false,
+							}}
+							onPress={press}
+						/>
+					);
 
 				if (Svg !== undefined) {
 					const card = codeCard(
@@ -572,83 +578,90 @@ export const register: Register = (on) => {
 					);
 				}
 
-				// The terminal: a rounded frame, the language on its top border, a dim gutter.
+				// The terminal: a rounded frame, the language on its top border, a dim gutter. The
+				// label and copy mark are laid over the border from a plain Box around the frame:
+				// inside the bordered Box, the border was drawn over them.
 				const shown = lines.slice(0, MAX_LINES);
 				const digits = String(lines.length).length;
 
 				return (
 					<Box flexDirection="column" marginY={1}>
-						<Box
-							flexDirection="column"
-							borderStyle="round"
-							borderColor={colors.gutter}
-							paddingX={1}
-						>
-							{shown.map((tokens, n) => (
-								<Text wrap="truncate-end">
-									{numbers ? (
-										<Text
-											color={colors.gutter}
-										>{`${String(n + 1).padStart(digits)}  `}</Text>
-									) : (
-										''
-									)}
-									{tokens.length === 0
-										? ' '
-										: tokens.map((token) => (
-												<Text
-													color={
-														token.color ??
-														colors.foreground
-													}
-													italic={
-														((token.fontStyle ??
-															0) &
-															1) !==
-														0
-													}
-													bold={
-														((token.fontStyle ??
-															0) &
-															2) !==
-														0
-													}
-													underline={
-														((token.fontStyle ??
-															0) &
-															4) !==
-														0
-													}
-												>
-													{token.content}
-												</Text>
-											))}
-								</Text>
-							))}
-							{lines.length > shown.length ? (
-								<Text
-									color={colors.gutter}
-								>{`${lines.length - shown.length} more lines (copy takes all of it)`}</Text>
-							) : (
-								''
-							)}
-							{header ? (
-								<Box position="absolute" top={-1} left={1}>
+						<Box flexDirection="column">
+							<Box
+								flexDirection="column"
+								borderStyle="round"
+								borderColor={colors.gutter}
+								paddingX={1}
+							>
+								{shown.map((tokens, n) => (
+									<Text wrap="truncate-end">
+										{numbers ? (
+											<Text
+												color={colors.gutter}
+											>{`${String(n + 1).padStart(digits)}  `}</Text>
+										) : (
+											''
+										)}
+										{tokens.length === 0
+											? ' '
+											: tokens.map((token) => (
+													<Text
+														color={
+															token.color ??
+															colors.foreground
+														}
+														italic={
+															((token.fontStyle ??
+																0) &
+																1) !==
+															0
+														}
+														bold={
+															((token.fontStyle ??
+																0) &
+																2) !==
+															0
+														}
+														underline={
+															((token.fontStyle ??
+																0) &
+																4) !==
+															0
+														}
+													>
+														{token.content}
+													</Text>
+												))}
+									</Text>
+								))}
+								{lines.length > shown.length ? (
 									<Text
 										color={colors.gutter}
-									>{` ${label} `}</Text>
+									>{`${lines.length - shown.length} more lines (copy takes all of it)`}</Text>
+								) : (
+									''
+								)}
+							</Box>
+							{header ? (
+								<Box position="absolute" top={0} left={2}>
+									<Text color={colors.gutter}>{` ${label} `}</Text>
 								</Box>
 							) : (
 								''
 							)}
-							<Box
-								key={`skin-code-copy-scope-${i}`}
-								position="absolute"
-								top={-1}
-								right={1}
-							>
-								{copyButton}
-							</Box>
+							{/* Only the fullscreen layout reports clicks; on the main screen the control could not be pressed. */}
+							{e.viewport?.isFullscreen === false ? (
+								''
+							) : (
+								<Box
+									key={`skin-code-copy-scope-${i}`}
+									position="absolute"
+									top={0}
+									right={2}
+								>
+									{copyButton}
+								</Box>
+							)}
 						</Box>
 					</Box>
 				);

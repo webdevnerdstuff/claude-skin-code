@@ -248,8 +248,12 @@ describe('copy control', () => {
 		expect(await card()).not.toContain(CHECK);
 	});
 
-	test('the terminal keeps the copy glyph as its control', async ($, on) => {
+	test('the terminal labels its control Copy, then Copied for two seconds', async ($, on) => {
 		world(on);
+
+		const clock = mock.clock(on);
+
+		on('ui.copy', () => ({ value: { isCopied: true } }));
 
 		const ui = await $.ui.mount({
 			plugin: 'skin-code',
@@ -258,10 +262,40 @@ describe('copy control', () => {
 			props: reply(PHP),
 			viewport: { columns: 100, rows: 40 },
 		});
+		const label = async () =>
+			(await ui.find({ key: 'skin-code-copy-0' }))?.props.label;
 
-		expect((await ui.find({ key: 'skin-code-copy-0' }))?.props.label).toBe(
-			'⧉',
-		);
+		// Words, as skins writes them: a glyph is drawn wider than its cell in many fonts.
+		expect(await label()).toBe(' Copy ');
+
+		await ui.press({ key: 'skin-code-copy-0' });
+		await clock.advance(0);
+
+		expect(await label()).toBe(' Copied ');
+
+		await clock.advance(2000);
+
+		expect(await label()).toBe(' Copy ');
+	});
+
+	test('the main screen reports no clicks, so it draws no copy control', async ($, on) => {
+		world(on);
+
+		const mount = (isFullscreen: boolean) =>
+			$.ui.mount({
+				plugin: 'skin-code',
+				surface: 'terminal',
+				component: 'AssistantMessage',
+				props: reply(PHP),
+				viewport: { columns: 100, rows: 40, isFullscreen },
+			});
+
+		const main = await mount(false);
+		const full = await mount(true);
+
+		expect(await main.find({ key: 'skin-code-copy-0' })).toBeUndefined();
+		expect(await main.find({ type: 'Text', text: ' php ' })).toBeDefined();
+		expect((await full.find({ key: 'skin-code-copy-0' }))?.props.label).toBe(' Copy ');
 	});
 });
 
@@ -363,5 +397,38 @@ describe('terminal', () => {
 			(await ui.find({ type: 'Text', text: /^Platform$/ }))?.props.color,
 		).toBe('#DF00DF');
 		expect(await ui.find({ type: 'Svg' })).toBeUndefined();
+	});
+
+	test('the label and copy control sit on the top border, laid from outside the frame', async ($, on) => {
+		world(on);
+
+		const ui = await $.ui.mount({
+			plugin: 'skin-code',
+			surface: 'terminal',
+			component: 'AssistantMessage',
+			props: reply(PHP),
+			viewport: { columns: 100, rows: 40 },
+		});
+
+		type Node = {
+			props?: { position?: unknown; top?: unknown; borderStyle?: unknown };
+			children?: readonly Node[];
+		};
+		// The reply, then the block: a plain Box holding the bordered frame and, over it, the
+		// label and the copy mark. Drawn inside the bordered Box, the border covered them.
+		const block = ((await ui.find({ type: 'Box' })) as Node).children?.[0];
+		const parts = block?.children?.[0]?.children ?? [];
+		const [frame, ...over] = parts;
+
+		expect(frame?.props?.borderStyle).toBe('round');
+		expect(
+			frame?.children?.some((child) => child.props?.position === 'absolute'),
+		).toBe(false);
+		expect(over.map((part) => [part.props?.position, part.props?.top])).toEqual([
+			['absolute', 0],
+			['absolute', 0],
+		]);
+		expect(await ui.find({ type: 'Text', text: ' php ' })).toBeDefined();
+		expect((await ui.find({ key: 'skin-code-copy-0' }))?.props.label).toBe(' Copy ');
 	});
 });

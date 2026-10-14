@@ -90,6 +90,12 @@ export function split(text: string): Segment[] | null {
 	return isDrawn ? segments : null;
 }
 
+// Whether skin-code draws a reply under the /skin-code setting `mode`: the render hook's own
+// test, answered to other mods by `$.skinCode.draws`.
+export function drawsReply(text: string, mode: string): boolean {
+	return mode !== 'off' && split(text) !== null;
+}
+
 function closerOf(fence: string): RegExp {
 	return new RegExp(
 		`^ {0,3}${fence[0] === '`' ? '`' : '~'}{${fence.length},}\\s*$`,

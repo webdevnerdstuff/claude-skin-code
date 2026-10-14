@@ -111,6 +111,23 @@ const all = await $.skinCode.themes()
 
 A theme added this way lasts for the session; call it from `session.start`. Its types are in [`types/index.d.ts`](types/index.d.ts).
 
+A mod that also draws replies can leave skin-code's to it, whichever of the two Claude Code runs first:
+
+```ts
+// In your mod's ui.render hook on AssistantMessage:
+let drawn = false
+
+try {
+  drawn = (await $.skinCode.draws({ text: e.props.text })) === true
+} catch {} // skin-code is not installed
+
+if (drawn) {
+  return next(e)
+}
+```
+
+`draws` is true while skin-code is on and the reply holds a fence it draws. skins does this.
+
 ### Into the bundle
 
 To ship a theme with skin-code itself, open a pull request: add its `.json` under `build/themes/` (or its Shiki name to `SHIKI_THEMES` in `build/build.mjs`), map a skin to it in `hooks/themes.ts` if one fits, and rebuild. See [AGENTS.md](AGENTS.md).

@@ -28,6 +28,9 @@ export type AddThemeArgs = {
 	lightness?: 'dark' | 'light';
 };
 
+// `$.skinCode.draws`'s argument: a reply's whole text.
+export type DrawsArgs = { text: string };
+
 // skins' markdown, when skins is installed: skin-code draws a reply's prose with it.
 export type SkinsMarkdownArgs = {
 	surface: 'terminal' | 'desktop' | 'vscode' | 'mobile';
@@ -42,6 +45,9 @@ declare module 'claude-code' {
 			addTheme: (args: AddThemeArgs) => Promise<string>;
 			// Every theme skin-code can draw with.
 			themes: (args?: Record<string, never>) => Promise<string[]>;
+			// Whether skin-code draws this reply: it is on, and the reply holds a fence it draws.
+			// Another mod that draws replies leaves these to skin-code.
+			draws: (args: DrawsArgs) => Promise<boolean>;
 		};
 		skins: {
 			markdown: (args: SkinsMarkdownArgs) => Promise<RenderElement | undefined>;

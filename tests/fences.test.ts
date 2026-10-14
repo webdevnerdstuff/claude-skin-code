@@ -1,7 +1,26 @@
 import { describe, expect, test } from 'claude-code/testing';
-import { expandTabs, split } from '../hooks/fences';
+import { drawsReply, expandTabs, split } from '../hooks/fences';
 
 const fence = (lang: string, body: string) => `\`\`\`${lang}\n${body}\n\`\`\``;
+
+// `$.skinCode.draws` answers with this; the kit cannot call a plugin noun from a test.
+describe('drawsReply', () => {
+	test('a reply with a fence skin-code draws is its own', () => {
+		expect(drawsReply(`Here:\n${fence('ts', 'const a = 1')}`, 'auto')).toBe(true);
+		expect(drawsReply(fence('php', '$a = 1;'), 'dracula')).toBe(true);
+	});
+
+	test('prose, and fences left alone, stay with skins or the app', () => {
+		expect(drawsReply('No code here.', 'auto')).toBe(false);
+		expect(
+			drawsReply(`${fence('bash', 'ls')}\n${fence('mermaid', 'graph TD; A-->B')}`, 'auto'),
+		).toBe(false);
+	});
+
+	test('off hands every reply back', () => {
+		expect(drawsReply(fence('ts', 'const a = 1'), 'off')).toBe(false);
+	});
+});
 
 describe('split', () => {
 	test('a reply without a fence it draws is left whole', () => {

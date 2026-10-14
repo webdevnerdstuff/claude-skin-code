@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code';
 import type { EngineInterface, Register, RenderChildren } from 'claude-code';
 import type { AddedTheme } from '../types';
 import { MAX_LINES, cardWidth, codeCard } from './card';
-import { expandTabs, split } from './fences';
+import { drawsReply, expandTabs, split } from './fences';
 import {
 	COMMAND,
 	helpText,
@@ -252,7 +252,11 @@ export const register: Register = (on) => {
 
 		return {
 			...built,
-			skinCode: { addTheme: async () => '', themes: async () => [] },
+			skinCode: {
+				addTheme: async () => '',
+				themes: async () => [],
+				draws: async () => false,
+			},
 		};
 	});
 
@@ -282,6 +286,11 @@ export const register: Register = (on) => {
 
 		return { value: themeNames() };
 	});
+
+	on('skinCode.draws', async ($, e) => ({
+		value:
+			typeof e.text === 'string' && drawsReply(e.text, await read($, mode)),
+	}));
 
 	on('session.start', async ($, e, next) => {
 		await $.command.register({

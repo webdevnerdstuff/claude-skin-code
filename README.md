@@ -83,6 +83,10 @@ With skins installed, skin-code uses skins' answer (Claude Code's theme, the ter
 - `diff`, `mermaid` and `math` fences: skins draws those as cards of their own
 - Languages it does not bundle, and everything outside fences: drawn by skins, or by the app
 
+### Known issue: skins sometimes draws the code
+
+skins and skin-code both draw replies, and whichever of the two Claude Code runs first draws the code. When skins runs first, code blocks are drawn in skins' own colours instead of the VS Code theme. A fix, skins leaving these replies to skin-code, is in [hellosverre/claude-skins#58](https://github.com/hellosverre/claude-skins/pull/58). Until it ships, `/skin off` leaves replies to skin-code; pick its theme with `/skin-code <theme>`, e.g. `/skin-code one-dark`.
+
 ## Add your own theme
 
 Any VS Code color theme works: the `.json` file a theme extension ships in its `themes/` folder.

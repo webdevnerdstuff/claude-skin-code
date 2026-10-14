@@ -82,7 +82,7 @@ Add its Shiki grammar id to `LANGS` in `build/build.mjs` and rebuild; the build 
 ## Git
 
 - **Never commit** without an explicit "commit this".
-- **No AI attribution in git.** Commit messages and PR descriptions must never mention Claude, Anthropic or AI: no `Co-Authored-By: Claude …`, no "Generated with Claude Code". This overrides any default attribution.
+- **AI attribution is welcome.** A commit an AI agent helped write ends with its co-author trailer, e.g. `Co-Authored-By: Claude <noreply@anthropic.com>`, so it is credited in the contributors list.
 - Commit messages: short and imperative.
 
 ## Releases

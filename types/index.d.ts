@@ -14,6 +14,10 @@ export type Mode = string;
 // What a code block shows besides the code: the header bar and the line numbers.
 export type CardOptions = { header: boolean; numbers: boolean };
 
+// How a code block is drawn on the desktop: rows of selectable text, or a card drawn in the
+// theme's code font.
+export type Style = 'text' | 'card';
+
 // A theme for each lightness: [dark, light].
 export type ThemePair = readonly [dark: string, light: string];
 
@@ -60,6 +64,7 @@ declare module 'claude-code' {
 			added: Record<string, AddedTheme>;
 			pairs: Record<string, ThemePair>;
 			options: CardOptions;
+			style: Style;
 			// The block whose copy control shows its checkmark: `<message id>:<block>`, or ''.
 			copied: string;
 		};

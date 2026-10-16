@@ -1,5 +1,5 @@
 // Which code theme each skins skin gets, dark first, then light. A skin with no light
-// counterpart keeps its dark theme: a code card carries its own background on the desktop.
+// counterpart keeps its dark theme: a code block carries its own background on the desktop.
 // Neon Bunny is one of those.
 
 export type ThemePair = readonly [dark: string, light: string];

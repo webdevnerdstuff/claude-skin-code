@@ -9,10 +9,10 @@ export type Colors = { background: string; foreground: string; gutter: string };
 export type CardOptions = {
 	header: boolean;
 	numbers: boolean;
-	// A copy control is laid over the card's top right; the card keeps room for it and
-	// draws its icon there: a copy icon, or a checkmark just after a copy.
+	// A copy control is laid over the card's top right; the card keeps room for it. Its
+	// icon is drawn by the control, not the card: the card is a frame, and a new drawing of
+	// it on each copy would reload the frame, a visible flash.
 	hasControl: boolean;
-	copied?: boolean;
 };
 
 const MONO = `ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace`;
@@ -26,32 +26,14 @@ const INSET = 10;
 const LINE_MID = CONTROL_MID - INSET;
 const HEADER_H = LINE_MID * 2;
 const LINE_H = 20;
+// The padding's size: a monospace cell this size is about a row tall.
+const PAD = 22;
 const CODE = 12.5;
 const RADIUS = 12;
 const MAX_SOURCE = 131072;
 
 // Room on the card's right for the copy control laid over it.
 export const CONTROL_SLOT = 40;
-
-// The control's icon: its centre this far in from the card's right edge, this size, drawn
-// as the app draws its own (outline strokes on a 24-unit grid, round caps and joins, at
-// full strength).
-const ICON_RIGHT = 20.4;
-// Measured from screenshots: the control's background centres a pixel below the labels' line.
-const ICON_DROP = 1;
-const ICON_SIZE = 12;
-
-const COPY_ICON =
-	'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>';
-const CHECK_ICON = '<path d="M20 6 9 17l-5-5"/>';
-
-function iconOf(copied: boolean, x: number, y: number, color: string): string {
-	const scale = ICON_SIZE / 24;
-	const left = x - ICON_SIZE / 2;
-	const top = y - ICON_SIZE / 2;
-
-	return `<g transform="translate(${left} ${top}) scale(${scale})" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${copied ? CHECK_ICON : COPY_ICON}</g>`;
-}
 
 // Space above the first line when there is no header: its middle on the control's line.
 const BARE_TOP = LINE_MID - 10;
@@ -110,7 +92,7 @@ function draw(
 	colors: Colors,
 	width: number,
 	shown: number,
-	{ header, numbers, hasControl, copied = false }: CardOptions,
+	{ header, numbers, hasControl }: CardOptions,
 ): string {
 	const { background, foreground, gutter } = colors;
 	const kept = lines.slice(0, shown);
@@ -124,23 +106,34 @@ function draw(
 	const clip = `skin-code-${width}x${height}`;
 	const mid = LINE_MID + 4;
 
+	// Each line is one <text> across the whole card: unselectable padding before the code
+	// (over the numbers) and after it, at PAD size so the line is as tall as its row. A drag
+	// that ends anywhere in a row lands on that row, never on the drawing beneath.
+	const lead = ' '.repeat(Math.ceil(gutterW / (PAD * 0.6)));
 	const rows = kept.map((tokens, i) => {
 		const y = top + i * LINE_H + 14;
 		const number = numbers
-			? `<text x="${gutterW - 12}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="11" style="fill:${gutter}">${i + 1}</text>`
+			? `<text class="chrome" x="${gutterW - 12}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="11" style="fill:${gutter}">${i + 1}</text>`
 			: '';
 
-		return `${number}<text x="${gutterW}" y="${y}" font-family="${MONO}" font-size="${CODE}" xml:space="preserve">${spansOf(tokens, maxChars, foreground)}</text>`;
-	});
+		// After the code, two spaces stretched to the card's edge, one over the other: a tall
+		// unselectable one that fills the row, so a drag ending in the gap between rows lands
+		// on it, and a selectable one at the code's size, so a drag can start right of a line
+		// and the highlight is as tall as the code's. A copy takes that single space, no more.
+		const chars = Math.min(maxChars, tokens.reduce((n, token) => n + [...token.content].length, 0));
+		const end = gutterW + chars * CODE * 0.6;
+		const room = Math.max(1, width - end);
 
+		return `${number}<text x="0" y="${y}" font-family="${MONO}" font-size="${CODE}" xml:space="preserve" pointer-events="bounding-box"><tspan class="pad" font-size="${PAD}">${lead}</tspan><tspan x="${gutterW}">${spansOf(tokens, maxChars, foreground)}</tspan><tspan class="pad" x="${end}" font-size="${PAD}" textLength="${room}" lengthAdjust="spacingAndGlyphs"> </tspan><tspan x="${end}" textLength="${room}" lengthAdjust="spacingAndGlyphs"> </tspan></text>`;
+	});
 	const footer =
 		hidden > 0
-			? `<text x="${gutterW}" y="${top + kept.length * LINE_H + 14}" font-size="11.5" style="fill:${gutter}">${hidden} more line${hidden === 1 ? '' : 's'} (copy takes all of it)</text>`
+			? `<text class="chrome" x="${gutterW}" y="${top + kept.length * LINE_H + 14}" font-size="11.5" style="fill:${gutter}">${hidden} more line${hidden === 1 ? '' : 's'} (copy takes all of it)</text>`
 			: '';
 	const head = header
 		? [
-				`<text x="16" y="${mid}" font-size="11" style="fill:${gutter};letter-spacing:.1em;font-weight:600">${escape(lang.toUpperCase())}</text>`,
-				`<text x="${width - 16 - (hasControl ? CONTROL_SLOT : 0)}" y="${mid}" text-anchor="end" font-size="11" style="fill:${gutter}">${lines.length} line${lines.length === 1 ? '' : 's'}</text>`,
+				`<text class="chrome" x="16" y="${mid}" font-size="11" style="fill:${gutter};letter-spacing:.1em;font-weight:600">${escape(lang.toUpperCase())}</text>`,
+				`<text class="chrome" x="${width - 16 - (hasControl ? CONTROL_SLOT : 0)}" y="${mid}" text-anchor="end" font-size="11" style="fill:${gutter}">${lines.length} line${lines.length === 1 ? '' : 's'}</text>`,
 				`<line x1="0" y1="${HEADER_H - 0.5}" x2="${width}" y2="${HEADER_H - 0.5}" stroke="${gutter}" stroke-opacity=".35"/>`,
 			].join('')
 		: '';
@@ -148,14 +141,11 @@ function draw(
 	return [
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height + INSET}" viewBox="0 0 ${width} ${height + INSET}">`,
 		`<defs><clipPath id="${clip}"><rect width="${width}" height="${height}" rx="${RADIUS}"/></clipPath></defs>`,
-		`<style>text{fill:${foreground}}text:not([font-family]){font-family:${FONT}}</style>`,
+		`<style>text{fill:${foreground}}text:not([font-family]){font-family:${FONT}}.chrome,.pad{-webkit-user-select:none;user-select:none}</style>`,
 		`<g transform="translate(0 ${INSET})">`,
 		`<g clip-path="url(#${clip})">`,
 		`<rect width="${width}" height="${height}" fill="${background}"/>`,
 		head,
-		hasControl
-			? iconOf(copied, width - ICON_RIGHT, LINE_MID + ICON_DROP, foreground)
-			: '',
 		rows.join(''),
 		footer,
 		`</g>`,

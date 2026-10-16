@@ -11,7 +11,7 @@ Real syntax highlighting for code blocks in Claude Code replies. skin-code token
 - Add any VS Code theme `.json` from a URL or a file: `/skin-code add <url or path>`
 - Follows the [skins](https://github.com/hellosverre/claude-skins) mod when it is installed: change your skin and the code colours change with it, light or dark
 - 39 languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them
-- Desktop app: each block is a card with the theme's background, line numbers, the language and a copy button; the header and numbers can be switched off
+- Desktop app: each block is drawn as text you can select, on the theme's background, with line numbers, the language and a copy button; the header and numbers can be switched off. `/skin-code style card` draws it instead as a card in the code font, whose text selects less cleanly
 - Terminal: framed rows in the theme's colours, with the language on the frame and, in Claude Code's fullscreen layout, a Copy button
 - An API so other mods can ship their own themes
 
@@ -42,6 +42,7 @@ Needs Claude Code 2.1.287 or newer, the version the tests run on (the function-h
 | `/skin-code remove <name>` | Removes a theme you added |
 | `/skin-code header on\|off` | Shows or hides the bar with the language and line count |
 | `/skin-code numbers on\|off` | Shows or hides the line numbers |
+| `/skin-code style text\|card` | Desktop blocks as rows of selectable text (the default), or as a card drawn in the code font |
 
 The setting, the header and numbers choices, and the themes you add are kept across sessions.
 
@@ -71,7 +72,7 @@ A skin you made in skins uses its own name's pair when there is one, else the pa
 
 Every theme is also available on its own by name, e.g. `/skin-code catppuccin-latte` stays light whatever the mode.
 
-On the desktop a card carries its theme's background, so a dark theme reads in a light app. On the terminal the code sits on the terminal's background, so a theme of the wrong lightness gives way to GitHub Dark or GitHub Light.
+On the desktop a block carries its theme's background, so a dark theme reads in a light app. On the terminal the code sits on the terminal's background, so a theme of the wrong lightness gives way to GitHub Dark or GitHub Light.
 
 ### Light and dark
 
@@ -138,7 +139,7 @@ To ship a theme with skin-code itself, open a pull request: add its `.json` unde
 
 ## How it works
 
-A `ui.render` hook on assistant messages splits each reply on its fences. Text between fences goes to skins (`$.skins.markdown`) or the app's own markdown; each fence in a bundled language is tokenized by Shiki with the JavaScript regex engine and drawn as an SVG card on the desktop or as coloured rows on the terminal.
+A `ui.render` hook on assistant messages splits each reply on its fences. Text between fences goes to skins (`$.skins.markdown`) or the app's own markdown; each fence in a bundled language is tokenized by Shiki with the JavaScript regex engine and drawn as coloured rows of text: on the theme's background on the desktop, in a frame on the terminal. With `/skin-code style card` the desktop instead gets an SVG card in the theme's code font, shown as a frame so its text can be selected.
 
 VS Code wraps a `.php` file in a `text.html.php` scope that Shiki's PHP grammar does not have, so theme rules written for it never match. skin-code copies each such rule under `source.php`, and draws `<?php` as one token, so PHP looks as it does in VS Code.
 

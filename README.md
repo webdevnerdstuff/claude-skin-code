@@ -5,15 +5,12 @@
 	</picture>
 </h1>
 
-Real syntax highlighting for code blocks in Claude Code replies. skin-code tokenizes each fenced block with **VS Code's own grammars** through [Shiki](https://shiki.style) and colours it with **VS Code themes**, so code in Claude Code looks the way it does in your editor.
+Real syntax highlighting for code blocks in Claude Code replies. skin-code highlights each fenced block with **VS Code's own grammars** through [Shiki](https://shiki.style) and colours it with **VS Code themes**, so code in Claude Code looks the way it does in your editor.
 
-- 29 themes bundled, dark and light, including [Neon Bunny](https://github.com/webdevnerdstuff/neon-bunny-vscode-theme) and Neon Bunny Carrot
-- Add any VS Code theme `.json` from a URL or a file: `/skin-code add <url or path>`
-- Follows the [skins](https://github.com/hellosverre/claude-skins) mod when it is installed: change your skin and the code colours change with it, light or dark
+- 29 themes, dark and light, including [Neon Bunny](https://github.com/webdevnerdstuff/neon-bunny-vscode-theme) and Neon Bunny Carrot, plus any VS Code theme you add
 - 39 languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them
-- Desktop app: each block is drawn as text you can select, on the theme's background, with line numbers, the language and a copy button; the header and numbers can be switched off. `/skin-code style card` draws it instead as a card in the code font, whose text selects less cleanly
-- Terminal: framed rows in the theme's colours, with the language on the frame and, in Claude Code's fullscreen layout, a Copy button
-- An API so other mods can ship their own themes
+- Follows the [skins](https://github.com/hellosverre/claude-skins) mod when it is installed: change your skin and the code colours follow, light or dark
+- In the desktop app and the terminal, with line numbers, the language and a copy button
 
 ## Install
 
@@ -25,133 +22,62 @@ In a Claude Code terminal session:
 
 Answer `y` to add the marketplace, then pick a scope (user scope loads it in every session, the desktop app's included).
 
-Needs Claude Code 2.1.287 or newer, the version the tests run on (the function-hooks mod API is early access and may change between releases). skins is optional.
+Needs Claude Code 2.1.287 or newer. skins is optional; with it, use skins 0.5.8 or newer.
+
+### Update and remove
+
+To update, refresh the marketplace, then update the plugin and restart Claude Code:
+
+```bash
+claude plugin marketplace update claude-skin-code
+claude plugin update skin-code@claude-skin-code
+```
+
+To remove it:
+
+```bash
+claude plugin uninstall skin-code@claude-skin-code
+```
 
 ## Use
 
 | Command | What it does |
 | --- | --- |
-| `/skin-code` | Shows the current setting and the theme drawing now |
+| `/skin-code` or `/skin-code status` | Shows what everything is set to |
 | `/skin-code auto` | Follows your skins skin, light or dark (the default) |
-| `/skin-code <skin>` | A skin's theme pair, switching with light and dark, e.g. `/skin-code catppuccin` |
+| `/skin-code <skin>` | A skin's dark and light themes, e.g. `/skin-code catppuccin` |
 | `/skin-code <theme>` | One theme, always, e.g. `/skin-code github-dark` |
 | `/skin-code off` | Leaves code blocks to skins or the app |
-| `/skin-code list` or `themes` | Lists every skin pair and theme |
-| `/skin-code help` | Lists the commands |
-| `/skin-code add <url or path>` | Adds a VS Code theme `.json`; a GitHub file link works as is |
+| `/skin-code list` or `/skin-code themes` | Every skin and theme |
+| `/skin-code add <url or path>` | Adds a VS Code theme `.json` |
 | `/skin-code remove <name>` | Removes a theme you added |
-| `/skin-code header on\|off` | Shows or hides the bar with the language and line count |
-| `/skin-code numbers on\|off` | Shows or hides the line numbers |
-| `/skin-code style text\|card` | Desktop blocks as rows of selectable text (the default), or as a card drawn in the code font |
+| `/skin-code header on\|off` | The bar with the language and line count |
+| `/skin-code numbers on\|off` | The line numbers |
+| `/skin-code style text\|card` | Desktop blocks as selectable text (the default), or as a card in the code font |
+| `/skin-code help` | Lists the commands |
 
-The setting, the header and numbers choices, and the themes you add are kept across sessions.
-
-### Themes per skin
-
-| Skin | Dark | Light |
-| --- | --- | --- |
-| `neon-bunny` (default) | Neon Bunny | Neon Bunny |
-| `neon-bunny-carrot` | Neon Bunny Carrot | Neon Bunny Carrot |
-| `ayu` | Ayu Dark | Ayu Light |
-| `catppuccin` | Catppuccin Mocha | Catppuccin Latte |
-| `dracula` | Dracula | Dracula |
-| `everforest` | Everforest Dark | Everforest Light |
-| `github` | GitHub Dark | GitHub Light |
-| `gruvbox` | Gruvbox Dark Medium | Gruvbox Light Medium |
-| `kanagawa` | Kanagawa Wave | Kanagawa Lotus |
-| `mono` | Min Dark | Min Light |
-| `night-owl` | Night Owl | Night Owl Light |
-| `noir` | Vitesse Black | Vitesse Light |
-| `nord` | Nord | Nord |
-| `one-dark` | One Dark Pro | One Light |
-| `rose-pine` | Rosé Pine | Rosé Pine Dawn |
-| `solarized` | Solarized Dark | Solarized Light |
-| `tokyo-night` | Tokyo Night | Tokyo Night |
-
-A skin you made in skins uses its own name's pair when there is one, else the pair of the skin it was based on. Without skins, `auto` draws Neon Bunny.
-
-Every theme is also available on its own by name, e.g. `/skin-code catppuccin-latte` stays light whatever the mode.
-
-On the desktop a block carries its theme's background, so a dark theme reads in a light app. On the terminal the code sits on the terminal's background, so a theme of the wrong lightness gives way to GitHub Dark or GitHub Light.
-
-### Light and dark
-
-With skins installed, skin-code uses skins' answer (Claude Code's theme, the terminal, then the system's appearance). Without it, skin-code reads Claude Code's `theme` setting. Set `SKIN_CODE_THEME=light` or `dark` to force one.
-
-### What it leaves alone
-
-- `bash`, `sh`, `zsh` and `shell` fences: the desktop app's own block keeps its Run button
-- `diff`, `mermaid` and `math` fences: skins draws those as cards of their own
-- Languages it does not bundle, and everything outside fences: drawn by skins, or by the app
-
-### Known issue: skins sometimes draws the code
-
-skins and skin-code both draw replies, and whichever of the two Claude Code runs first draws the code. When skins runs first, code blocks are drawn in skins' own colours instead of the VS Code theme. A fix, skins leaving these replies to skin-code, is in [hellosverre/claude-skins#58](https://github.com/hellosverre/claude-skins/pull/58). Until it ships, `/skin off` leaves replies to skin-code; pick its theme with `/skin-code <theme>`, e.g. `/skin-code one-dark`.
+Your settings and the themes you add are kept across sessions. Without skins, `auto` draws Neon Bunny; set `SKIN_CODE_THEME=light` or `dark` to pick the lightness yourself.
 
 ## Add your own theme
 
-Any VS Code color theme works: the `.json` file a theme extension ships in its `themes/` folder.
+Any VS Code color theme works: the `.json` file a theme extension ships in its `themes/` folder. A GitHub file link or a local path both work, and skin-code switches to the theme once it is added:
 
 ```bash
 /skin-code add https://github.com/you/your-theme/blob/main/themes/your-theme.json
-/skin-code your-theme
 ```
 
-A local file works too: `/skin-code add ~/themes/your-theme.json`. The name comes from the theme's `name`, lower-cased with dashes.
+## For mod authors
 
-### From another mod
-
-skin-code adds `$.skinCode` for other mods, the way skins adds `$.skins`:
-
-```ts
-// In your mod's session.start hook:
-const name = await $.skinCode.addTheme({
-  theme: myVsCodeTheme,   // a VS Code theme object
-  skin: 'my-skin',        // optional: use it for this skins skin
-  lightness: 'dark',      // optional: which half of that skin's pair; from the theme's `type` when left out
-})
-
-const all = await $.skinCode.themes()
-```
-
-A theme added this way lasts for the session; call it from `session.start`. Its types are in [`types/index.d.ts`](types/index.d.ts).
-
-A mod that also draws replies can leave skin-code's to it, whichever of the two Claude Code runs first:
-
-```ts
-// In your mod's ui.render hook on AssistantMessage:
-let drawn = false
-
-try {
-  drawn = (await $.skinCode.draws({ text: e.props.text })) === true
-} catch {} // skin-code is not installed
-
-if (drawn) {
-  return next(e)
-}
-```
-
-`draws` is true while skin-code is on and the reply holds a fence it draws. skins does this.
-
-### Into the bundle
-
-To ship a theme with skin-code itself, open a pull request: add its `.json` under `build/themes/` (or its Shiki name to `SHIKI_THEMES` in `build/build.mjs`), map a skin to it in `hooks/themes.ts` if one fits, and rebuild. See [AGENTS.md](AGENTS.md).
-
-## How it works
-
-A `ui.render` hook on assistant messages splits each reply on its fences. Text between fences goes to skins (`$.skins.markdown`) or the app's own markdown; each fence in a bundled language is tokenized by Shiki with the JavaScript regex engine and drawn as coloured rows of text: on the theme's background on the desktop, in a frame on the terminal. With `/skin-code style card` the desktop instead gets an SVG card in the theme's code font, shown as a frame so its text can be selected.
-
-VS Code wraps a `.php` file in a `text.html.php` scope that Shiki's PHP grammar does not have, so theme rules written for it never match. skin-code copies each such rule under `source.php`, and draws `<?php` as one token, so PHP looks as it does in VS Code.
+Other mods can add themes and leave replies to skin-code through `$.skinCode`; the API is in [`types/index.d.ts`](types/index.d.ts).
 
 ## Develop
 
 ```bash
-pnpm build     # bundles Shiki, the grammars and the themes into hooks/vendor
-pnpm validate  # claude plugin validate .
-pnpm test      # claude plugin test .
+pnpm build  # bundles Shiki, the grammars and the themes into hooks/vendor
+pnpm check  # validates and tests
 ```
 
-Load it from the folder while you work on it: `claude --plugin-dir .`. More in [AGENTS.md](AGENTS.md).
+Load it from the folder while you work on it: `claude --plugin-dir .`. To add a theme or a language to the bundle, see [AGENTS.md](AGENTS.md).
 
 ## Credits
 

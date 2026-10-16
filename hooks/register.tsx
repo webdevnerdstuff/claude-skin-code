@@ -625,7 +625,10 @@ export const register: Register = (on) => {
 							{tokens.length === 0
 								? ' '
 								: tokens.map((token) => (
+									// Every token unwrapped too: a desktop wraps a line between its
+									// tokens, which a one-row line then cuts in half.
 									<Text
+										wrap="truncate-end"
 										color={token.color ?? colors.foreground}
 										italic={((token.fontStyle ?? 0) & 1) !== 0}
 										bold={((token.fontStyle ?? 0) & 2) !== 0}

@@ -62,7 +62,7 @@ These are refused at load, so `validate` catches them; they shape the code:
 1. Shiki bundles it: add its name to `SHIKI_THEMES` in `build/build.mjs`. Otherwise drop its VS Code `.json` in `build/themes/` and add its file name to `NEON_BUNNY` (or a new list beside it) in `build/build.mjs`.
 2. If it fits a skins skin, map the skin in `hooks/themes.ts` (`[dark, light]`; use the dark theme twice when there is no light one).
 3. `pnpm build`, then `pnpm check`.
-4. Note it in `README.md` (the per-skin table). Release notes come from PR titles, so give the PR a clear one.
+4. If the bundle's theme count changed, update it in `README.md`. Release notes come from PR titles, so give the PR a clear one.
 
 ## Adding a language
 

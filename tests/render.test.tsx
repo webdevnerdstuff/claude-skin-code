@@ -186,6 +186,22 @@ describe('desktop', () => {
 		expect(rowOf(root, 'Platform')?.props?.paddingLeft).toBe(0);
 	});
 
+	test('a long line stays one row: its tokens never wrap', async ($, on) => {
+		world(on);
+
+		const ui = await $.ui.mount({
+			plugin: 'skin-code',
+			surface: 'desktop',
+			component: 'AssistantMessage',
+			props: reply(PHP),
+		});
+
+		// A desktop wraps a line between its tokens; a one-row line would cut it in half.
+		expect((await ui.find({ type: 'Text', text: /^Platform$/ }))?.props.wrap).toBe(
+			'truncate-end',
+		);
+	});
+
 	test('a reply without code is left to what draws beneath', async ($, on) => {
 		world(on);
 

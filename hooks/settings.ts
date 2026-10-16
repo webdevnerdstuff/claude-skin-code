@@ -10,6 +10,10 @@ export type Option = 'header' | 'numbers';
 
 export type Options = Readonly<Record<Option, boolean>>;
 
+// How a code block is drawn on the desktop: 'text', rows of selectable text in the app's
+// font, or 'card', a drawing in the theme's code font whose text selects less cleanly.
+export type Style = 'text' | 'card';
+
 export type Pairs = Readonly<Record<string, ThemePair>>;
 
 export type Parsed =
@@ -20,6 +24,7 @@ export type Parsed =
 	| { kind: 'add'; source: string }
 	| { kind: 'remove'; name: string }
 	| { kind: 'option'; option: Option; value: boolean }
+	| { kind: 'style'; style: Style }
 	| { kind: 'unknown'; word: string };
 
 // The setting a word names: a skin's pair, one theme, auto or off; `on` and nothing are auto.
@@ -51,7 +56,7 @@ export function parse(
 	const word = first.toLowerCase();
 	const tail = rest.join(' ').trim();
 
-	if (word === '') {
+	if (word === '' || word === 'status') {
 		return { kind: 'status' };
 	}
 
@@ -76,6 +81,10 @@ export function parse(
 		(tail === 'on' || tail === 'off')
 	) {
 		return { kind: 'option', option: word, value: tail === 'on' };
+	}
+
+	if (word === 'style' && (tail === 'text' || tail === 'card')) {
+		return { kind: 'style', style: tail };
 	}
 
 	const setting = settingOf(word, themes, pairs);
@@ -146,7 +155,45 @@ export const optionsText = (options: Options): string =>
 export const optionText = (option: Option, value: boolean): string =>
 	`${option === 'header' ? 'Code block header' : 'Line numbers'} ${value ? 'on' : 'off'}.`;
 
-// The reply to /skin-code alone.
+// How the desktop draws code blocks, in words: the reply to /skin-code style, and a line of
+// the status.
+export const styleText = (style: Style): string =>
+	style === 'card'
+		? 'Desktop code blocks: card, drawn in the code font.'
+		: "Desktop code blocks: text, selectable as the app's own.";
+
+// The theme in a few words, for the status table: the setting and, when it could be more
+// than one, the theme it draws with now.
+export function themeNow(
+	setting: string,
+	drawing: string | undefined,
+	pairs: Pairs = SKIN_THEMES,
+	names: Names = asIs,
+	skin?: string,
+): string {
+	if (setting === 'off') {
+		return 'off (left to skins or the app)';
+	}
+
+	if (setting === 'auto') {
+		const from = skin === undefined ? '' : `, from your skin ${skin}`;
+
+		return drawing === undefined ? 'auto' : `auto: ${names(drawing)}${from}`;
+	}
+
+	const pair = pairs[setting];
+
+	if (pair === undefined || pair[0] === pair[1]) {
+		return names(pair?.[0] ?? setting);
+	}
+
+	const now = drawing === undefined ? '' : `, now ${names(drawing)}`;
+
+	return `${names(pair[0])} / ${names(pair[1])} in light${now}`;
+}
+
+// The reply to /skin-code alone: what everything is set to, as a table. It opens with a
+// line of text, as help does: Claude Code puts the plugin's name before a reply's first line.
 export function statusText(
 	setting: string,
 	drawing: string | undefined,
@@ -154,8 +201,27 @@ export function statusText(
 	names: Names = asIs,
 	skin?: string,
 	options: Options = { header: true, numbers: true },
+	style: Style = 'text',
 ): string {
-	return `${settingText(setting, drawing, pairs, names, skin)}\n${optionsText(options)}\n/skin-code list shows every theme.`;
+	const onOff = (on: boolean) => (on ? 'on' : 'off');
+
+	return [
+		'skin-code settings',
+		'',
+		markdownTable(
+			['Setting', 'Now'],
+			[
+				['Theme', themeNow(setting, drawing, pairs, names, skin)],
+				['Header', onOff(options.header)],
+				['Line numbers', onOff(options.numbers)],
+				['Style', style === 'card' ? 'card (code font)' : 'text (selectable)'],
+			],
+		),
+		'',
+		'`/skin-code help` shows the commands.',
+		'',
+		'`/skin-code list` shows every theme.',
+	].join('\n');
 }
 
 // A markdown table whose cells are padded to line up: the desktop draws it as a table,
@@ -280,7 +346,9 @@ export function listText({
 			]),
 		),
 		'',
-		'/skin-code help shows the commands.',
+		'`/skin-code status` shows what everything is set to.',
+		'',
+		'`/skin-code help` shows the commands.',
 	].join('\n');
 }
 
@@ -294,19 +362,23 @@ export function helpText(): string {
 		markdownTable(
 			['Command', 'What it does'],
 			[
-				['/skin-code <skin>', 'follows light and dark'],
-				['/skin-code <theme>', 'that theme, always'],
-				['/skin-code auto', 'follow your skins skin'],
-				['/skin-code off', 'leave code blocks to skins or the app'],
-				['/skin-code list (or themes)', 'every skin and theme'],
-				['/skin-code add <url or path>', 'add a VS Code theme .json'],
-				['/skin-code remove <name>', 'remove a theme you added'],
-				['/skin-code header on/off', 'the language and line count bar'],
-				['/skin-code numbers on/off', 'the line numbers'],
+				['`/skin-code` (or `status`)', 'what everything is set to'],
+				['`/skin-code <skin>`', 'follows light and dark'],
+				['`/skin-code <theme>`', 'that theme, always'],
+				['`/skin-code auto`', 'follow your skins skin'],
+				['`/skin-code off`', 'leave code blocks to skins or the app'],
+				['`/skin-code list` (or `themes`)', 'every skin and theme'],
+				['`/skin-code add <url or path>`', 'add a VS Code theme .json'],
+				['`/skin-code remove <name>`', 'remove a theme you added'],
+				['`/skin-code header on/off`', 'the language and line count bar'],
+				['`/skin-code numbers on/off`', 'the line numbers'],
+				['`/skin-code style text/card`', 'desktop blocks as selectable text, or a card in the code font'],
 			],
 		),
 		'',
-		'/skin-code list shows the themes.',
+		'`/skin-code status` shows what everything is set to.',
+		'',
+		'`/skin-code list` shows every theme.',
 	].join('\n');
 }
 

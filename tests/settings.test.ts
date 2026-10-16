@@ -9,6 +9,7 @@ import {
 	settingOf,
 	settingText,
 	statusText,
+	styleText,
 } from '../hooks/settings';
 import { SKIN_THEMES } from '../hooks/themes';
 
@@ -261,7 +262,11 @@ group('listText', () => {
 
 	test('the themes, then where the commands are; no commands table', () => {
 		expect(text).not.toContain('| Command');
-		expect(lines.at(-1)).toBe('/skin-code help shows the commands.');
+		expect(lines.slice(-3)).toEqual([
+			'`/skin-code status` shows what everything is set to.',
+			'',
+			'`/skin-code help` shows the commands.',
+		]);
 	});
 });
 
@@ -282,7 +287,11 @@ group('helpText', () => {
 		expect(help).not.toContain('| Skin');
 		// Claude Code prefixes a reply's first line with the plugin's name: a table can't start there.
 		expect(help.split('\n')[0]).not.toMatch(/^\|/);
-		expect(help.split('\n').at(-1)).toBe('/skin-code list shows the themes.');
+		expect(help.split('\n').slice(-3)).toEqual([
+			'`/skin-code status` shows what everything is set to.',
+			'',
+			'`/skin-code list` shows every theme.',
+		]);
 	});
 });
 
@@ -340,7 +349,7 @@ group('options', () => {
 				header: false,
 				numbers: true,
 			}),
-		).toContain('Header off · line numbers on.');
+		).toMatch(/\| Header +\| off +\|\n\| Line numbers +\| on +\|/);
 	});
 
 	test('the list shows them, and help how to switch them', () => {
@@ -355,5 +364,34 @@ group('options', () => {
 		expect(text.split('\n')[0]).toContain('header on · line numbers off.');
 		expect(helpText()).toContain('/skin-code header on/off');
 		expect(helpText()).toContain('/skin-code numbers on/off');
+	});
+});
+
+group('style', () => {
+	test('style text or card sets how the desktop draws; anything else is no theme', () => {
+		expect(parse('style card', THEMES)).toEqual({ kind: 'style', style: 'card' });
+		expect(parse('style text', THEMES)).toEqual({ kind: 'style', style: 'text' });
+		expect(parse('style blue', THEMES)).toEqual({ kind: 'unknown', word: 'style' });
+	});
+
+	test('the status says the style, text when unset, and help how to switch it', () => {
+		expect(styleText('card')).toBe('Desktop code blocks: card, drawn in the code font.');
+		expect(statusText('dracula', 'dracula')).toMatch(/\| Style +\| text \(selectable\) +\|/);
+		expect(
+			statusText('dracula', 'dracula', SKIN_THEMES, undefined, undefined, undefined, 'card'),
+		).toMatch(/\| Style +\| card \(code font\) +\|/);
+		expect(helpText()).toContain('/skin-code style text/card');
+	});
+
+	test('status, or nothing, is the settings table, listed first in help', () => {
+		expect(parse('status', THEMES)).toEqual({ kind: 'status' });
+		expect(parse('', THEMES)).toEqual({ kind: 'status' });
+		expect(statusText('auto', 'dracula', SKIN_THEMES, undefined, 'dracula')).toMatch(
+			/^skin-code settings\n\n\| Setting +\| Now +\|[\s\S]*\| Theme +\| auto: dracula, from your skin dracula +\|/,
+		);
+		expect(statusText('auto', 'dracula')).toMatch(
+			/\n\n`\/skin-code help` shows the commands\.\n\n`\/skin-code list` shows every theme\.$/,
+		);
+		expect(helpText()).toContain('`/skin-code` (or `status`)');
 	});
 });

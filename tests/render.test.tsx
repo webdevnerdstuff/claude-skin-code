@@ -202,6 +202,27 @@ describe('desktop', () => {
 		);
 	});
 
+	test('a fence in a language it does not bundle is still a block in the theme', async ($, on) => {
+		world(on);
+
+		const ui = await $.ui.mount({
+			plugin: 'skin-code',
+			surface: 'desktop',
+			component: 'AssistantMessage',
+			props: reply('```code\nError: no tab with id 12\n```'),
+		});
+
+		expect(await backgroundOf(ui)).toBe('#000000');
+		expect(
+			await ui.find({ type: 'Text', text: /^Error: no tab with id 12$/ }),
+		).toBeDefined();
+		// The header names the fence as written.
+		expect(await ui.find({ type: 'Text', text: /^CODE$/ })).toBeDefined();
+		expect(
+			await ui.find({ type: 'Text', text: 'engine reply' }),
+		).toBeUndefined();
+	});
+
 	test('a reply without code is left to what draws beneath', async ($, on) => {
 		world(on);
 
@@ -628,6 +649,23 @@ describe('terminal', () => {
 			(await ui.find({ type: 'Text', text: /^Platform$/ }))?.props.color,
 		).toBe('#DF00DF');
 		expect(await ui.find({ type: 'Svg' })).toBeUndefined();
+	});
+
+	test('a fence with no language is framed rows too', async ($, on) => {
+		world(on);
+
+		const ui = await $.ui.mount({
+			plugin: 'skin-code',
+			surface: 'terminal',
+			component: 'AssistantMessage',
+			props: reply('```\nplain words\n```'),
+			viewport: { columns: 100, rows: 40 },
+		});
+
+		expect(await ui.find({ type: 'Text', text: /^plain words$/ })).toBeDefined();
+		expect(
+			await ui.find({ type: 'Text', text: 'engine reply' }),
+		).toBeUndefined();
 	});
 
 	test('the label and copy control sit on the top border, laid from outside the frame', async ($, on) => {

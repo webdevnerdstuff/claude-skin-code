@@ -17,6 +17,11 @@ describe('drawsReply', () => {
 		).toBe(false);
 	});
 
+	test('a fence in a language skin-code does not bundle is its own too', () => {
+		expect(drawsReply(fence('code', 'Error: no tab with id 12'), 'auto')).toBe(true);
+		expect(drawsReply(fence('', 'plain words'), 'auto')).toBe(true);
+	});
+
 	test('off hands every reply back', () => {
 		expect(drawsReply(fence('ts', 'const a = 1'), 'off')).toBe(false);
 	});
@@ -71,8 +76,25 @@ describe('split', () => {
 		});
 	});
 
-	test('an unknown language is left to the prose', () => {
-		expect(split(fence('brainfuck', '+++'))).toBeNull();
+	test('an unknown language is drawn as plain text, its tag kept for the label', () => {
+		expect(split(fence('code', 'Error: no tab with id 12'))).toEqual([
+			{ kind: 'code', lang: 'text', tag: 'code', code: 'Error: no tab with id 12' },
+		]);
+		expect(split(fence('brainfuck', '+++'))).toEqual([
+			{ kind: 'code', lang: 'text', tag: 'brainfuck', code: '+++' },
+		]);
+	});
+
+	test('a fence with no language is drawn as plain text', () => {
+		expect(split(fence('', 'plain words'))).toEqual([
+			{ kind: 'code', lang: 'text', tag: '', code: 'plain words' },
+		]);
+	});
+
+	test('shells and patches skins draws are left alone, bundled or not', () => {
+		for (const tag of ['fish', 'cmd', 'bat', 'patch']) {
+			expect(split(fence(tag, 'x'))).toBeNull();
+		}
 	});
 
 	test('an unclosed fence, as a reply streams, runs to the end', () => {

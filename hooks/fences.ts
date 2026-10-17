@@ -14,12 +14,20 @@ const LEFT_ALONE = new Set([
 	'sh',
 	'shell',
 	'zsh',
+	'fish',
+	'cmd',
+	'bat',
 	'shellscript',
 	'console',
 	'mermaid',
 	'math',
 	'diff',
+	'patch',
 ]);
+
+// A fence in a language skin-code does not bundle, or with none named, is still its block:
+// the theme's colours, with no highlighting.
+const PLAIN = 'text';
 
 const OPEN = /^ {0,3}(`{3,}|~{3,})\s*([^\s`]*)/;
 
@@ -35,7 +43,7 @@ export function split(text: string): Segment[] | null {
 		const line = lines[i] ?? '';
 		const open = OPEN.exec(line);
 		const tag = open?.[2] ?? '';
-		const lang = open === null ? undefined : resolveLang(tag);
+		const lang = open === null ? undefined : (resolveLang(tag) ?? PLAIN);
 
 		if (
 			open === null ||

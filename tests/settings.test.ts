@@ -1,6 +1,7 @@
 import { describe as group, expect, test } from 'claude-code/testing';
 import {
 	describe,
+	galleryThemes,
 	helpText,
 	listText,
 	optionText,
@@ -8,6 +9,7 @@ import {
 	rawUrl,
 	settingOf,
 	settingText,
+	skinsOf,
 	statusText,
 	styleText,
 } from '../hooks/settings';
@@ -393,5 +395,33 @@ group('style', () => {
 			/\n\n`\/skin-code help` shows the commands\.\n\n`\/skin-code list` shows every theme\.$/,
 		);
 		expect(helpText()).toContain('`/skin-code` (or `status`)');
+	});
+});
+
+group('gallery', () => {
+	test('parses gallery with an optional lightness', () => {
+		expect(parse('gallery', THEMES)).toEqual({ kind: 'gallery', filter: 'all' });
+		expect(parse('gallery Light', THEMES)).toEqual({ kind: 'gallery', filter: 'light' });
+		expect(parse('gallery dark', THEMES)).toEqual({ kind: 'gallery', filter: 'dark' });
+		expect(parse('gallery blue', THEMES)).toEqual({ kind: 'unknown', word: 'gallery' });
+	});
+
+	test('filters by lightness, Neon Bunny first', () => {
+		const all = ['one-light', 'dracula', 'neon-bunny', 'github-light'];
+		const isLight = (theme: string) => theme.endsWith('-light');
+
+		expect(galleryThemes(all, 'all', isLight)).toEqual([
+			'neon-bunny',
+			'dracula',
+			'github-light',
+			'one-light',
+		]);
+		expect(galleryThemes(all, 'light', isLight)).toEqual(['github-light', 'one-light']);
+		expect(galleryThemes(all, 'dark', isLight)).toEqual(['neon-bunny', 'dracula']);
+	});
+
+	test('names the skins a theme belongs to', () => {
+		expect(skinsOf('github-dark', SKIN_THEMES)).toEqual(['github']);
+		expect(skinsOf('nobody', SKIN_THEMES)).toEqual([]);
 	});
 });

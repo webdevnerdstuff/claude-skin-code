@@ -18,6 +18,35 @@ export type CardOptions = { header: boolean; numbers: boolean };
 // theme's code font.
 export type Style = 'text' | 'card';
 
+// Which themes /skin-code gallery shows: every one, or those of one lightness.
+export type GalleryFilter = 'all' | 'dark' | 'light';
+
+// One theme's block in /skin-code gallery, worked out by the command so the pane only draws:
+// its names, its colours and the sample's lines as runs of one style.
+export type GalleryRun = { text: string; color: string; italic: boolean; bold: boolean };
+
+export type GalleryCard = {
+	theme: string;
+	name: string;
+	caption: string;
+	isLight: boolean;
+	foreground: string;
+	background: string;
+	gutter: string;
+	lines: GalleryRun[][];
+};
+
+// What the gallery pane draws: the themes asked for, the one drawing now, and whether
+// Claude Code is drawing light, which the terminal's pane filters by.
+export type Gallery = {
+	filter: GalleryFilter;
+	// The page of blocks shown, from 0.
+	page: number;
+	current: string;
+	light: boolean;
+	cards: GalleryCard[];
+};
+
 // A theme for each lightness: [dark, light].
 export type ThemePair = readonly [dark: string, light: string];
 
@@ -67,6 +96,7 @@ declare module 'claude-code' {
 			style: Style;
 			// The block whose copy control shows its checkmark: `<message id>:<block>`, or ''.
 			copied: string;
+			gallery: Gallery;
 		};
 	}
 }

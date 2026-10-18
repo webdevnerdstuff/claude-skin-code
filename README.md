@@ -49,6 +49,7 @@ claude plugin uninstall skin-code@claude-skin-code
 | `/skin-code <theme>` | One theme, always, e.g. `/skin-code github-dark` |
 | `/skin-code off` | Leaves code blocks to skins or the app |
 | `/skin-code list` or `/skin-code themes` | Every skin and theme |
+| `/skin-code gallery [dark\|light]` | Opens a pane with the same snippet drawn in every theme, six to a page, the current one marked; on the terminal, only the themes that read on its background |
 | `/skin-code add <url or path>` | Adds a VS Code theme `.json` |
 | `/skin-code remove <name>` | Removes a theme you added |
 | `/skin-code header on\|off` | The bar with the language and line count |

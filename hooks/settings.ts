@@ -16,9 +16,13 @@ export type Style = 'text' | 'card';
 
 export type Pairs = Readonly<Record<string, ThemePair>>;
 
+// Which themes /skin-code gallery shows: every one, or those of one lightness.
+export type GalleryFilter = 'all' | 'dark' | 'light';
+
 export type Parsed =
 	| { kind: 'status' }
 	| { kind: 'list' }
+	| { kind: 'gallery'; filter: GalleryFilter }
 	| { kind: 'help' }
 	| { kind: 'set'; setting: string }
 	| { kind: 'add'; source: string }
@@ -66,6 +70,15 @@ export function parse(
 
 	if (word === 'help') {
 		return { kind: 'help' };
+	}
+
+	const filter = tail.toLowerCase() || 'all';
+
+	if (
+		word === 'gallery' &&
+		(filter === 'all' || filter === 'dark' || filter === 'light')
+	) {
+		return { kind: 'gallery', filter };
 	}
 
 	if (word === 'add' && tail !== '') {
@@ -352,6 +365,35 @@ export function listText({
 	].join('\n');
 }
 
+// The snippet every theme in the gallery draws: a comment, keywords, a type, a string, a
+// number and a call, so the themes differ where they differ most.
+export const GALLERY_SAMPLE = {
+	lang: 'typescript',
+	code: [
+		'// Pick the crunchiest snack',
+		'type Snack = { name: string; crunch: number };',
+		'const pick = (all: Snack[]) =>',
+		"  all.find((s) => s.crunch > 7)?.name ?? 'carrot';",
+	].join('\n'),
+} as const;
+
+// The themes /skin-code gallery shows, Neon Bunny first, then by name.
+export function galleryThemes(
+	themes: readonly string[],
+	filter: GalleryFilter,
+	isLight: (theme: string) => boolean,
+): string[] {
+	return themes
+		.filter((theme) => filter === 'all' || isLight(theme) === (filter === 'light'))
+		.sort(neonFirst);
+}
+
+// The skins whose dark or light half is this theme, for a caption under its name.
+export const skinsOf = (theme: string, pairs: Pairs): string[] =>
+	Object.keys(pairs)
+		.filter((skin) => pairs[skin]?.includes(theme))
+		.sort();
+
 // Every /skin-code command and what it does: the reply to /skin-code help. It opens with a
 // line of text: Claude Code puts the plugin's name before a reply's first line, which would
 // break a table that started there.
@@ -368,6 +410,7 @@ export function helpText(): string {
 				['`/skin-code auto`', 'follow your skins skin'],
 				['`/skin-code off`', 'leave code blocks to skins or the app'],
 				['`/skin-code list` (or `themes`)', 'every skin and theme'],
+				['`/skin-code gallery [dark/light]`', 'a sample of code in every theme'],
 				['`/skin-code add <url or path>`', 'add a VS Code theme .json'],
 				['`/skin-code remove <name>`', 'remove a theme you added'],
 				['`/skin-code header on/off`', 'the language and line count bar'],

@@ -701,3 +701,79 @@ describe('terminal', () => {
 		expect((await ui.find({ key: 'skin-code-copy-0' }))?.props.label).toBe(' Copy ');
 	});
 });
+
+describe('gallery', () => {
+	// The pane /skin-code gallery opens, as a surface seats it.
+	const pane = (surface: 'terminal' | 'desktop') =>
+		({
+			plugin: 'skin-code',
+			surface,
+			component: 'Pane',
+			requestId: 'skin-code-gallery',
+			viewport: { columns: 100, rows: 30 },
+			props: {
+				title: 'Code theme gallery',
+				isFocused: true,
+				bodyColumns: 80,
+				placement: 'dock',
+				scroll: { offset: 0, bodyRows: 30 },
+				view: {},
+			},
+		}) as const;
+
+	// A surface that seats the pane /skin-code gallery opens.
+	const seated = (on: On) => on('ui.open', () => ({ value: { isPlaced: true } }));
+
+	test('the desktop pane draws every theme as a block, the current one marked', async ($, on) => {
+		world(on);
+		seated(on);
+
+		await run($, 'gallery');
+		const ui = await $.ui.mount(pane('desktop'));
+
+		expect(await ui.find({ key: 'skin-code-gallery-neon-bunny' })).toBeDefined();
+		// Six to a page: a theme further down the list waits for Next.
+		expect(await ui.find({ key: 'skin-code-gallery-github-light' })).toBeUndefined();
+		expect(await ui.find({ type: 'Text', text: 'page 1 of 5' })).toBeDefined();
+		expect(await ui.find({ type: 'Text', text: 'current' })).toBeDefined();
+		expect(await ui.find({ type: 'Text', text: /^Code theme gallery · \d+ themes$/ })).toBeDefined();
+	});
+
+	test('gallery light leaves the dark themes out', async ($, on) => {
+		world(on);
+		seated(on);
+
+		await run($, 'gallery light');
+		const ui = await $.ui.mount(pane('desktop'));
+
+		expect(await ui.find({ key: 'skin-code-gallery-github-light' })).toBeDefined();
+		expect(await ui.find({ key: 'skin-code-gallery-github-dark' })).toBeUndefined();
+	});
+
+	test('a dark terminal shows only dark themes and says how many it hid', async ($, on) => {
+		world(on);
+		seated(on);
+
+		await run($, 'gallery');
+		const ui = await $.ui.mount(pane('terminal'));
+
+		expect(await ui.find({ key: 'skin-code-gallery-ayu-dark' })).toBeDefined();
+		expect(await ui.find({ key: 'skin-code-gallery-ayu-light' })).toBeUndefined();
+		expect(await ui.find({ type: 'Text', text: /light hidden on this terminal$/ })).toBeDefined();
+	});
+
+	test('the command opens the pane and prints nothing', async ($, on) => {
+		world(on);
+
+		const opened: string[] = [];
+
+		on('ui.open', (_$, e) => {
+			opened.push(e.id);
+
+			return { value: { isPlaced: true } };
+		});
+
+		expect((await run($, 'gallery')).text).toBeUndefined();
+		expect(opened).toEqual(['skin-code-gallery']);
+	});
+});

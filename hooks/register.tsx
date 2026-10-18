@@ -1,9 +1,11 @@
 import { atom, read, update } from 'claude-code';
 import type { EngineInterface, Register, RenderChildren } from 'claude-code';
-import type { AddedTheme } from '../types';
+import type { AddedTheme, Gallery, GalleryCard, GalleryRun } from '../types';
 import { drawsReply, expandTabs, split } from './fences';
 import {
 	COMMAND,
+	GALLERY_SAMPLE,
+	galleryThemes,
 	helpText,
 	isUrl,
 	listText,
@@ -11,6 +13,7 @@ import {
 	parse,
 	rawUrl,
 	settingText,
+	skinsOf,
 	statusText,
 	styleText,
 } from './settings';
@@ -73,6 +76,18 @@ const options = atom({ plugin: 'skin-code', key: 'options' } as const, {
 	header: true,
 	numbers: true,
 });
+// The pane /skin-code gallery opens, and which themes it shows.
+const GALLERY = 'skin-code-gallery';
+// Blocks per page of the gallery: every theme at once was too large a tree for the desktop's
+// pane, which then drew nothing.
+const GALLERY_PAGE = 6;
+const gallery = atom({ plugin: 'skin-code', key: 'gallery' } as const, {
+	filter: 'all',
+	page: 0,
+	current: '',
+	light: false,
+	cards: [],
+} as Gallery);
 // How the desktop draws a block: rows of selectable text by default, or the card.
 const style = atom({ plugin: 'skin-code', key: 'style' } as const, 'text' as Style);
 
@@ -207,6 +222,31 @@ async function themeOf(
 const indentOf = (tokens: readonly ThemedToken[] | undefined): number =>
 	/^ */.exec((tokens ?? []).map((token) => token.content).join(''))?.[0].length ?? 0;
 
+// A line's tokens joined where they look the same, so the gallery sends one Text per run of
+// a colour: a remote surface takes a tree of at most 100,000 characters, and every theme's
+// sample drawn token by token passed it.
+function runsOf(tokens: readonly ThemedToken[], foreground: string): GalleryRun[] {
+	const runs: GalleryRun[] = [];
+
+	for (const token of tokens) {
+		const color = token.color ?? foreground;
+		const italic = ((token.fontStyle ?? 0) & 1) !== 0;
+		const bold = ((token.fontStyle ?? 0) & 2) !== 0;
+		const last = runs[runs.length - 1];
+		// Spaces take any style: only their background would show it, and they have none.
+		const isBlank = token.content.trim() === '';
+
+		if (last !== undefined && (isBlank || (last.color === color && last.italic === italic && last.bold === bold))) {
+			last.text += token.content;
+			continue;
+		}
+
+		runs.push({ text: token.content, color, italic, bold });
+	}
+
+	return runs;
+}
+
 // A reply redraws as it streams; the same block tokenizes once per theme.
 const tokenCache = new Map<string, ThemedToken[][]>();
 
@@ -332,7 +372,7 @@ export const register: Register = (on) => {
 			description:
 				'Colour code blocks with VS Code themes: auto, off, list, add, or a theme',
 			argumentHint:
-				'[status | auto | off | list | themes | help | add <url or path> | remove <name> | style text|card | <theme>]',
+				'[status | auto | off | list | themes | gallery [dark|light] | help | add <url or path> | remove <name> | style text|card | <theme>]',
 			immediate: true,
 		});
 
@@ -395,6 +435,46 @@ export const register: Register = (on) => {
 					isLight: (theme) => colorsOf(theme).isLight,
 				}),
 			};
+		}
+
+		if (asked.kind === 'gallery') {
+			// The command works the whole gallery out, tokenizing each theme's sample (about a
+			// second in all), and keeps it in state: the pane only draws it, at once.
+			const cards: GalleryCard[] = galleryThemes(
+				themeNames(),
+				asked.filter,
+				(name) => colorsOf(name).isLight,
+			).map((theme) => {
+				const colors = colorsOf(theme);
+				const skins = skinsOf(theme, all);
+
+				return {
+					theme,
+					name: displayNameOf(theme),
+					caption: skins.length === 0 ? theme : `${theme} · skin ${skins.join(', ')}`,
+					isLight: colors.isLight,
+					foreground: colors.foreground,
+					background: colors.background,
+					gutter: colors.gutter,
+					lines: tokensOf(GALLERY_SAMPLE.code, GALLERY_SAMPLE.lang, theme).map(
+						(tokens) => runsOf(tokens, colors.foreground),
+					),
+				};
+			});
+
+			const current = (await themeOf($, await read($, mode), 'desktop')) ?? '';
+			const light = await isLight($);
+
+			await update($, gallery, () => ({ filter: asked.filter, page: 0, current, light, cards }));
+			// The pane draws the gallery; the command shows nothing of its own, as skins' does.
+			await $.ui.open({
+				id: GALLERY,
+				title: 'Code theme gallery',
+				focus: true,
+				closeOnEscape: true,
+			});
+
+			return {};
 		}
 
 		if (asked.kind === 'status') {
@@ -503,6 +583,94 @@ export const register: Register = (on) => {
 				await activeSkinOf($),
 			),
 		};
+	});
+
+	// /skin-code gallery's pane: the same snippet in every theme, as small blocks laid side by
+	// side, the theme drawing now marked.
+	// Matched on the component alone, the pane told by its id here: on the desktop a matcher
+	// naming `requestId` never ran this hook, and the pane stayed empty.
+	on('ui.render', { component: 'Pane' }, async ($, e, next) => {
+		if (e.requestId !== GALLERY) {
+			return next(e);
+		}
+
+		const { Box, Button, Text } = $.ui.resolve(e);
+		const { filter, page, current, light, cards: every } = await read($, gallery);
+		const isTerminal = e.surface === 'terminal';
+		// The terminal paints no block background, so a theme of the other lightness would
+		// draw on the wrong ground: it shows only the themes that read there.
+		const cards = isTerminal ? every.filter((card) => card.isLight === light) : every;
+		const hidden = every.length - cards.length;
+		const pages = Math.max(1, Math.ceil(cards.length / GALLERY_PAGE));
+		const at = Math.min(page, pages - 1);
+		const shown = cards.slice(at * GALLERY_PAGE, (at + 1) * GALLERY_PAGE);
+		const turn = (by: number) => () =>
+			void update($, gallery, (was) => ({
+				...was,
+				page: Math.min(Math.max(0, at + by), pages - 1),
+			}));
+		const which = filter === 'all' ? '' : ` ${filter}`;
+		const away =
+			hidden === 0 ? '' : ` · ${hidden} ${light ? 'dark' : 'light'} hidden on this terminal`;
+
+		return (
+			<Box flexDirection="column" marginY={1}>
+				<Text bold>
+					{`Code theme gallery · ${cards.length}${which} theme${cards.length === 1 ? '' : 's'}${away}`}
+				</Text>
+				<Box flexDirection="row" gap={1}>
+					<Button key="skin-code-gallery-prev" label=" Previous " onPress={turn(-1)} />
+					<Text dimColor>{`page ${at + 1} of ${pages}`}</Text>
+					<Button key="skin-code-gallery-next" label=" Next " onPress={turn(1)} />
+				</Box>
+				<Box flexDirection="column" marginY={1}>
+					{shown.map((card) => {
+						const isCurrent = card.theme === current;
+
+						return (
+							<Box
+								key={`skin-code-gallery-${card.theme}`}
+								flexDirection="column"
+								marginBottom={1}
+								borderStyle="round"
+								borderColor={isCurrent ? card.foreground : card.gutter}
+								backgroundColor={isTerminal ? undefined : card.background}
+								paddingX={1}
+							>
+								<Box flexDirection="row" justifyContent="space-between">
+									<Text color={card.foreground} bold wrap="truncate-end">
+										{card.name}
+									</Text>
+									{isCurrent ? <Text color={card.foreground}>current</Text> : ''}
+								</Box>
+								<Text color={card.gutter} wrap="truncate-end">
+									{card.caption}
+								</Text>
+								<Text> </Text>
+								{card.lines.map((runs) => (
+									<Text wrap="truncate-end">
+										{runs.length === 0
+											? ' '
+											: runs.map((run) => (
+												<Text
+													color={run.color}
+													italic={run.italic || undefined}
+													bold={run.bold || undefined}
+												>
+													{run.text}
+												</Text>
+											))}
+									</Text>
+								))}
+							</Box>
+						);
+					})}
+				</Box>
+				<Text dimColor>
+					{'/skin-code <theme> picks one · /skin-code gallery dark|light narrows it · Esc closes'}
+				</Text>
+			</Box>
+		);
 	});
 
 	on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {

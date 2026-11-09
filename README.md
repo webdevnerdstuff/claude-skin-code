@@ -5,7 +5,18 @@
 	</picture>
 </h1>
 
-Real syntax highlighting for code blocks in Claude Code replies. skin-code highlights each fenced block with **VS Code's own grammars** through [Shiki](https://shiki.style) and colours it with **VS Code themes**, so code in Claude Code looks the way it does in your editor.
+<p align="center">
+	<strong>Real syntax highlighting for code blocks in Claude Code replies.</strong>
+</p>
+
+<p align="center">
+	<a href="https://github.com/webdevnerdstuff/claude-skin-code/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/webdevnerdstuff/claude-skin-code?color=ff1190&label=release"></a>
+	<a href="https://github.com/webdevnerdstuff/claude-skin-code/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/webdevnerdstuff/claude-skin-code/actions/workflows/ci.yml/badge.svg"></a>
+	<img alt="Claude Code 2.1.287+" src="https://img.shields.io/badge/Claude%20Code-2.1.287%2B-2492ff">
+	<a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/webdevnerdstuff/claude-skin-code?color=555"></a>
+</p>
+
+skin-code highlights each fenced block with **VS Code's own grammars** through [Shiki](https://shiki.style) and colours it with **VS Code themes**, so code in Claude Code looks the way it does in your editor.
 
 - 29 themes, dark and light, including [Neon Bunny](https://github.com/webdevnerdstuff/neon-bunny-vscode-theme) and Neon Bunny Carrot, plus any VS Code theme you add
 - 39 languages, with PHP, Blade, Vue, TypeScript and JavaScript first among them

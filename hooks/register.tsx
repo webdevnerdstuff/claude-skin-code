@@ -251,7 +251,7 @@ function runsOf(tokens: readonly ThemedToken[], foreground: string): GalleryRun[
 const tokenCache = new Map<string, ThemedToken[][]>();
 
 function tokensOf(code: string, lang: string, theme: string): ThemedToken[][] {
-	const key = `${theme}\u0000${lang}\u0000${code}`;
+	const key = `${theme}\n${lang}\n${code}`;
 	const kept = tokenCache.get(key);
 
 	if (kept !== undefined) {
